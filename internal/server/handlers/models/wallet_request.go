@@ -1,16 +1,11 @@
 package models
 
-type operationType string
-
-const (
-	depositOperation  = operationType("DEPOSIT")
-	withdrawOperation = operationType("WITHDRAW")
-)
+import "github.com/geooooo/itk-go-test/internal/db"
 
 type WalletRequest struct {
-	Id        string        `json:"valletId"`
-	Operation operationType `json:"operationType"`
-	Amount    uint          `json:"amount"`
+	Id        string           `json:"valletId"`
+	Operation db.OperationType `json:"operationType"`
+	Amount    uint             `json:"amount"`
 }
 
 func (wr *WalletRequest) IsValid() bool {
@@ -19,7 +14,7 @@ func (wr *WalletRequest) IsValid() bool {
 		return false
 	}
 
-	if wr.Operation != depositOperation && wr.Operation != withdrawOperation {
+	if wr.Operation != db.DepositOperation && wr.Operation != db.WithdrawOperation {
 		return false
 	}
 

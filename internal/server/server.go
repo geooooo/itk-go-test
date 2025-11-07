@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/geooooo/itk-go-test/internal/config"
+	"github.com/geooooo/itk-go-test/internal/db"
 	"github.com/geooooo/itk-go-test/internal/logger"
 	"github.com/geooooo/itk-go-test/internal/server/api"
 	"github.com/geooooo/itk-go-test/internal/server/handlers"
@@ -13,17 +15,23 @@ import (
 )
 
 func RunServer(configPath string, logOutput *os.File) {
-	logger := logger.NewSimpleLogger(logOutput)
+	logger := logger.NewLogger(logOutput)
 
-	config := newConfig(logger)
-	config.readFromFile(configPath)
+	config := config.NewConfig(logger)
+	config.ReadFromFile(configPath)
 
-	initHandlers(config.apiVersion, logger)
+	db, err := db.NewDb(config)
+	if err != nil {
+		logger.Error(err)
+		os.Exit(1)
+	}
 
-	addr := config.addr()
+	initHandlers(config.ApiVersion, logger, db)
+
+	addr := config.Addr()
 	logger.Log(fmt.Sprintf("starting server %s", addr))
 
-	err := http.ListenAndServe(addr, nil)
+	err = http.ListenAndServe(addr, nil)
 	if errors.Is(err, http.ErrServerClosed) {
 		logger.Log("server stopped")
 	} else {
@@ -33,7 +41,7 @@ func RunServer(configPath string, logOutput *os.File) {
 }
 
 // TODO: по-хорошему, при bad request надо отдавать доп информацию о произошедшей ошибке клиету
-func initHandlers(apiVersion string, logger logger.Logger) {
+func initHandlers(apiVersion string, logger logger.ILogger, db db.IDb) {
 	http.HandleFunc(
 		"/",
 		middlewares.RequestLogMiddleware(
@@ -45,7 +53,7 @@ func initHandlers(apiVersion string, logger logger.Logger) {
 	http.HandleFunc(
 		api.ConfigureEndpoint(api.Wallet, apiVersion),
 		middlewares.RequestLogMiddleware(
-			handlers.HandleWallet(logger),
+			handlers.HandleWallet(logger, db),
 			logger,
 		),
 	)
@@ -54,7 +62,7 @@ func initHandlers(apiVersion string, logger logger.Logger) {
 	http.HandleFunc(
 		walletsEndpoint,
 		middlewares.RequestLogMiddleware(
-			handlers.HandleWallets(walletsEndpoint, logger),
+			handlers.HandleWallets(walletsEndpoint, logger, db),
 			logger,
 		),
 	)
