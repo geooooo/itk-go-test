@@ -13,7 +13,7 @@ import (
 )
 
 func RunServer(configPath string, logOutput *os.File) {
-	logger := logger.NewLogger(logOutput)
+	logger := logger.NewSimpleLogger(logOutput)
 
 	config := newConfig(logger)
 	config.readFromFile(configPath)
@@ -32,7 +32,16 @@ func RunServer(configPath string, logOutput *os.File) {
 	}
 }
 
-func initHandlers(apiVersion string, logger *logger.Logger) {
+// TODO: по-хорошему, при bad request надо отдавать доп информацию о произошедшей ошибке клиету
+func initHandlers(apiVersion string, logger logger.Logger) {
+	http.HandleFunc(
+		"/",
+		middlewares.RequestLogMiddleware(
+			handlers.HandleOthers(logger),
+			logger,
+		),
+	)
+
 	http.HandleFunc(
 		api.ConfigureEndpoint(api.Wallet, apiVersion),
 		middlewares.RequestLogMiddleware(
@@ -41,10 +50,11 @@ func initHandlers(apiVersion string, logger *logger.Logger) {
 		),
 	)
 
+	walletsEndpoint := api.ConfigureEndpoint(api.Wallets, apiVersion)
 	http.HandleFunc(
-		api.ConfigureEndpoint(api.Wallets, apiVersion),
+		walletsEndpoint,
 		middlewares.RequestLogMiddleware(
-			handlers.HandleWallets(logger),
+			handlers.HandleWallets(walletsEndpoint, logger),
 			logger,
 		),
 	)

@@ -14,10 +14,10 @@ type config struct {
 	port       string
 	apiVersion string
 
-	logger *logger.Logger
+	logger logger.Logger
 }
 
-func newConfig(logger *logger.Logger) *config {
+func newConfig(logger logger.Logger) *config {
 	return &config{
 		logger: logger,
 	}

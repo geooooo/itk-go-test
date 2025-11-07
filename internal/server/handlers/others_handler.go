@@ -6,8 +6,8 @@ import (
 	"github.com/geooooo/itk-go-test/internal/logger"
 )
 
-func HandleWallets(logger *logger.Logger) http.HandlerFunc {
+func HandleOthers(logger logger.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		logger.Log("do something")
+		w.WriteHeader(http.StatusBadRequest)
 	}
 }
