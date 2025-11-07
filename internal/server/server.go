@@ -31,6 +31,7 @@ func RunServer(configPath string, logOutput *os.File) {
 	addr := config.Addr()
 	logger.Log(fmt.Sprintf("starting server %s", addr))
 
+	// TODO: (упрощение) обработка сигналов опущена
 	err = http.ListenAndServe(addr, nil)
 	if errors.Is(err, http.ErrServerClosed) {
 		logger.Log("server stopped")
@@ -40,7 +41,7 @@ func RunServer(configPath string, logOutput *os.File) {
 	}
 }
 
-// TODO: по-хорошему, при bad request надо отдавать доп информацию о произошедшей ошибке клиету
+// TODO: (упрощение) по-хорошему, при bad request надо отдавать доп информацию о произошедшей ошибке клиету
 func initHandlers(apiVersion string, logger logger.ILogger, db db.IDb) {
 	http.HandleFunc(
 		"/",

@@ -8,6 +8,8 @@ import (
 
 const configPath = "config.env"
 
+// TODO: накидать тестов
+// TODO: обернуть в docker и compose
 func main() {
 	server.RunServer(configPath, os.Stdout)
 }

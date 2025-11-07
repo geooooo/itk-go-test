@@ -52,9 +52,15 @@ func (db *Db) UpdateWalletBalance(uuid string, amount uint, operation OperationT
 	}
 	defer sqlDb.Close()
 
+	sqlTx, err := sqlDb.Begin()
+	if err != nil {
+		return err
+	}
+
 	sqlRow := sqlDb.QueryRow(getWalletSumSQL, uuid)
 	sum := uint(0)
 	if err := sqlRow.Scan(&sum); err != nil {
+		sqlTx.Rollback()
 		return err
 	}
 
@@ -62,12 +68,19 @@ func (db *Db) UpdateWalletBalance(uuid string, amount uint, operation OperationT
 	case DepositOperation:
 		sum += amount
 	case WithdrawOperation:
-		sum -= amount
+		if amount > sum {
+			sum = 0
+		} else {
+			sum -= amount
+		}
 	}
 
 	if _, err := sqlDb.Exec(upateWalletSumSQL, sum, uuid); err != nil {
+		sqlTx.Rollback()
 		return err
 	}
+
+	sqlTx.Commit()
 
 	return nil
 }

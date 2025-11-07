@@ -9,7 +9,7 @@ type WalletRequest struct {
 }
 
 func (wr *WalletRequest) IsValid() bool {
-	// TODO: нужно валидировать в соответствии с uuid
+	// TODO: (упрощение) нужно валидировать в соответствии с uuid
 	if len(wr.Id) == 0 {
 		return false
 	}
