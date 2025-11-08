@@ -1,12 +1,8 @@
 package config
 
 import (
-	"bufio"
 	"fmt"
 	"os"
-	"strings"
-
-	"github.com/geooooo/itk-go-test/internal/logger"
 )
 
 type Config struct {
@@ -19,53 +15,17 @@ type Config struct {
 	dbName     string
 	dbUser     string
 	dbPassword string
-
-	logger logger.ILogger
 }
 
-func NewConfig(logger logger.ILogger) *Config {
+func NewConfig() *Config {
 	return &Config{
-		logger: logger,
-	}
-}
-
-func (c *Config) ReadFromFile(path string) {
-	file, err := os.Open(path)
-	if err != nil {
-		c.logger.Error(err)
-		os.Exit(1)
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		if err := scanner.Err(); err != nil {
-			c.logger.Error(err)
-			os.Exit(1)
-		}
-
-		line := scanner.Text()
-		parts := strings.Split(line, "=")
-		key, value := parts[0], parts[1]
-
-		switch key {
-		case "host":
-			c.host = value
-		case "port":
-			c.port = value
-		case "apiVersion":
-			c.ApiVersion = value
-		case "dbUser":
-			c.dbUser = value
-		case "dbPassword":
-			c.dbPassword = value
-		case "dbName":
-			c.dbName = value
-		case "dbReset":
-			c.DbReset = value == "yes"
-		default:
-			c.logger.Error(fmt.Errorf("unexpected config line '%s'", line))
-		}
+		host:       os.Getenv("host"),
+		port:       os.Getenv("port"),
+		ApiVersion: os.Getenv("apiVersion"),
+		DbReset:    os.Getenv("dbReset") == "yes",
+		dbName:     os.Getenv("dbName"),
+		dbUser:     os.Getenv("dbUser"),
+		dbPassword: os.Getenv("dbPassword"),
 	}
 }
 

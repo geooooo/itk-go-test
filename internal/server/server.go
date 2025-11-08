@@ -16,9 +16,7 @@ import (
 
 func RunServer(configPath string, logOutput *os.File) {
 	logger := logger.NewLogger(logOutput)
-
-	config := config.NewConfig(logger)
-	config.ReadFromFile(configPath)
+	config := config.NewConfig()
 
 	db, err := db.NewDb(config)
 	if err != nil {

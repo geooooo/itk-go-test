@@ -25,7 +25,7 @@ func HandleWallets(endpoint string, logger logger.ILogger, db db.IDb) http.Handl
 		parts := strings.Split(r.URL.Path, endpoint)
 		uuidParam := parts[1]
 
-		if len(uuidParam) == 0. || strings.Contains(uuidParam, "/") {
+		if len(uuidParam) == 0 || strings.Contains(uuidParam, "/") {
 			logger.Error(fmt.Errorf("%s - error on request format", formattedRequestUri))
 			w.WriteHeader(http.StatusBadRequest)
 			return
